@@ -15,20 +15,21 @@ public class Game {
     GameGUI gameGUI;
 
 
-    public Game(GameGUI gameGUI){
+    public Game(GameGUI gameGUI) {
         this.gameGUI = gameGUI;
         currentPlayer = 0;
         this.board = Board.currentBoard = new Board(this);
     }
 
-    public Board getBoard(){
+    public Board getBoard() {
         return board;
     }
 
-    public static int getNextPlayer(){
+    public static int getNextPlayer() {
         return (Game.currentPlayer + 1) % 2;
     }
-    public static void setNextPlayer(){
+
+    public static void setNextPlayer() {
         Game.currentPlayer = (Game.currentPlayer + 1) % 2;
     }
 

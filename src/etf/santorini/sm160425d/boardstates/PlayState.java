@@ -50,7 +50,7 @@ public class PlayState extends BoardState {
                     move = Move.MOVE;                                                                           //diskutabilno
                     return;
                 }
-            }else{
+            } else {
                 System.out.println("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
                 return;
             }
@@ -62,8 +62,8 @@ public class PlayState extends BoardState {
 
                 if (tokenWeAreWorkingWith.move(row, col)) {                                                        //check if movement can be performed
 
-                    if (tokenWeAreWorkingWith.getMyField().getMyHeight() == 3) {                                      //check if player won
-                        System.out.println("IMAMO POBEDNIKA");                                                      //TODO move to GUI
+                    if (Board.currentPlayerWon()) {                                                                     //check if player won
+                        System.out.println("IMAMO POBEDNIKA");                                                          //TODO move to GUI
                         Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.currentPlayer));
                     }
 

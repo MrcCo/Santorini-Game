@@ -36,7 +36,7 @@ public class GameGUI extends Application {
 
 
         //sidebox setup
-        sideBox.setMinSize(400,800);
+        sideBox.setMinSize(400, 800);
 
         sideBox.getChildren().add(numberOfAI);
 
@@ -44,12 +44,12 @@ public class GameGUI extends Application {
         beginGame.setOnMouseClicked(e -> {
             Game.numberOfAIPlayers = Integer.parseInt(numberOfAI.getText());
 
-            if(Game.numberOfAIPlayers > 2)
+            if (Game.numberOfAIPlayers > 2)
                 Game.numberOfAIPlayers = 2;
-            if(Game.numberOfAIPlayers < 0)
+            if (Game.numberOfAIPlayers < 0)
                 Game.numberOfAIPlayers = 0;
 
-            if(Game.numberOfAIPlayers == 2){
+            if (Game.numberOfAIPlayers == 2) {
                 Board.currentBoard.setCurrentBoardState(AIInitial.getInstance());
             }
 
@@ -60,9 +60,9 @@ public class GameGUI extends Application {
 
         sideBox.getChildren().add(aiMove);
         aiMove.setOnMouseClicked(e -> {
-            if(Game.aiTurn){
+            if (Game.aiTurn) {
                 System.out.println("OOOOOK ?");
-                Board.currentBoard.boardOperation(0,0);
+                Board.currentBoard.boardOperation(0, 0);
             }
         });
         primaryPane.setRight(sideBox);
@@ -72,7 +72,7 @@ public class GameGUI extends Application {
         primaryStage.show();
     }
 
-    public static void main(String args[]){
+    public static void main(String args[]) {
         launch(args);
     }
 

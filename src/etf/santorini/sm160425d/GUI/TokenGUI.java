@@ -9,11 +9,11 @@ public class TokenGUI extends Circle {
     private Token myToken;
     private Color color;
 
-    public TokenGUI(Token token){
+    public TokenGUI(Token token) {
         super(75, 75, 20);
         this.myToken = token;
 
-        if(myToken.getPlayer() == 0)
+        if (myToken.getPlayer() == 0)
             this.color = Color.BLUE;                                                                                    //player one is blue
         else                                                                                                            //player two is red
             this.color = Color.RED;
@@ -23,16 +23,16 @@ public class TokenGUI extends Circle {
 
     }
 
-    public void highlight(){
-        if(myToken.getPlayer() == 0)
+    public void highlight() {
+        if (myToken.getPlayer() == 0)
             this.color = Color.DARKBLUE;
         else
             this.color = Color.DARKRED;
         this.setFill(color);
     }
 
-    public void lowlight(){
-        if(myToken.getPlayer() == 0)
+    public void lowlight() {
+        if (myToken.getPlayer() == 0)
             this.color = Color.BLUE;
         else
             this.color = Color.RED;

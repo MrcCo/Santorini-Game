@@ -13,7 +13,7 @@ public class MoveLeadingToThisBoard {
         this.tokenMoved = tokenMoved;
     }
 
-    public  MoveLeadingToThisBoard(Board board ){
+    public MoveLeadingToThisBoard(Board board) {
         this.board = board;
     }
 
@@ -74,8 +74,11 @@ public class MoveLeadingToThisBoard {
         this.board = board;
     }
 
-    public int calculateFunction(){
+    public int calculateFunction() {
         int m = board.getFieldHeight(rowTo, colTo);
+
+        if (board.getFieldHeight(rowTo, colTo) == 3)
+            m += 1000;
 
         int distTokenZero = Math.abs(board.tokens[0].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[0].getMyField().getRow() - rowBuilt);
         int distTokenOne = Math.abs(board.tokens[1].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[1].getMyField().getRow() - rowBuilt);
@@ -84,11 +87,11 @@ public class MoveLeadingToThisBoard {
 
         int l = distTokenZero + distTokenOne - distTokenTwo - distTokenThree;
 
-        if(Game.currentPlayer == 1){
+        if (Game.currentPlayer == 1) {
             l = -1 * l;
         }
 
-        l *= board.getFieldHeight(rowBuilt,colBuilt);
+        l *= board.getFieldHeight(rowBuilt, colBuilt);
 
         return m + l;
     }

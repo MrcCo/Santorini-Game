@@ -7,14 +7,14 @@ public class AIInitial extends BoardState {
 
     private static AIInitial instance;
 
-    public AIInitial(){
+    public AIInitial() {
     }
 
-    public static AIInitial getInstance(){
-        if(instance == null)
+    public static AIInitial getInstance() {
+        if (instance == null)
             instance = new AIInitial();
         Game.aiTurn = true;
-        return  instance;
+        return instance;
     }
 
 
@@ -26,10 +26,10 @@ public class AIInitial extends BoardState {
 
         Game.setNextPlayer();
 
-        if(Game.numberOfAIPlayers == 1){
+        if (Game.numberOfAIPlayers == 1) {
             Board.currentBoard.setCurrentBoardState(PlayState.getInstance());
-        }else{
-            if(Game.currentPlayer == 0)
+        } else {
+            if (Game.currentPlayer == 0)
                 Board.currentBoard.setCurrentBoardState(AIPlayState.getInstance());
         }
     }

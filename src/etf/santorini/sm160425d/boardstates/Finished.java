@@ -1,12 +1,12 @@
 package etf.santorini.sm160425d.boardstates;
 
-public class Finished extends BoardState{
+public class Finished extends BoardState {
 
     private static Finished instance;
     private int winner;
 
-    public static Finished getInstance(int winner){
-        if(instance == null)
+    public static Finished getInstance(int winner) {
+        if (instance == null)
             instance = new Finished();
 
         instance.winner = winner;

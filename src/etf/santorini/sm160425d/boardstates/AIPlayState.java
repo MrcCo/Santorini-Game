@@ -8,14 +8,14 @@ public class AIPlayState extends BoardState {
 
     private static AIPlayState instance;
 
-    public AIPlayState(){
+    public AIPlayState() {
     }
 
-    public static AIPlayState getInstance(){
-        if(instance == null)
+    public static AIPlayState getInstance() {
+        if (instance == null)
             instance = new AIPlayState();
         Game.aiTurn = true;
-        return  instance;
+        return instance;
     }
 
 
@@ -25,23 +25,23 @@ public class AIPlayState extends BoardState {
 
         boolean succ = Board.currentBoard.AIFullMove();                                                                                //do AI move
 
-        if(succ == false){
+        if (succ == false) {
             System.out.println("Izgubio sam :(");
             Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.getNextPlayer()));
         }
 
-        if(Board.currentPlayerWon() == true){                                                                           //finish the game if i won
+        if (Board.currentPlayerWon() == true) {                                                                           //finish the game if i won
             Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.currentPlayer));
             System.out.println("I WON U DUMB HUMAN");
             return;
         }
         Game.setNextPlayer();                                                                                           //set next player
 
-        if(Game.numberOfAIPlayers == 1) {                                                                               //if AI is playing vs hunab let him play
+        if (Game.numberOfAIPlayers == 1) {                                                                               //if AI is playing vs hunab let him play
             Board.currentBoard.setCurrentBoardState(PlayState.getInstance());
         }
 
-        if(!Game.aiTurn)
+        if (!Game.aiTurn)
             System.out.println("NEXT IS MAN" + Game.currentPlayer);                                                     //TODO MOVE TO GUI
     }
 }

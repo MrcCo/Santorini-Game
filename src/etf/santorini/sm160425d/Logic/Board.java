@@ -123,13 +123,12 @@ public class Board {
         return cTokens;
     }
 
-    public static boolean currentPlayerWon(){
+    public static boolean currentPlayerWon() {
         Token[] tokens = Board.currentBoard.getPlayersTokens(Game.currentPlayer);
-        if(tokens[0].getMyField().getMyHeight() == 3 || tokens[1].getMyField().getMyHeight() == 3 ){
+        if (tokens[0].getMyField().getMyHeight() == 3 || tokens[1].getMyField().getMyHeight() == 3) {
             return true;
         }
 
-        if()
         return false;
     }                                                                       //check if current player reached lvl 3
 
@@ -433,7 +432,6 @@ public class Board {
             best = Integer.MAX_VALUE;
 
             for (Board b : allMoves) {
-                best = Math.min(best, minimax(b, depth + 1, !isMax));
                 test = Math.min(best, minimaxAB(b, depth + 1, !isMax, alpha, beta));
                 best = Math.min(best, test);
                 beta = Math.min(beta, best);
@@ -456,7 +454,6 @@ public class Board {
         Board bestBoard = null;
 
         for (Board iter : allMoves) {
-            //int val = Board.minimax(iter, 0, true);
             int val = Board.minimaxAB(iter, 0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if (val > best) {
                 best = val;

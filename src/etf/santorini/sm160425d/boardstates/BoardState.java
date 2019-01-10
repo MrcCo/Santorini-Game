@@ -5,7 +5,7 @@ import etf.santorini.sm160425d.Logic.Board;
 public abstract class BoardState {
 
 
-    public BoardState(){
+    public BoardState() {
 
     }
 
