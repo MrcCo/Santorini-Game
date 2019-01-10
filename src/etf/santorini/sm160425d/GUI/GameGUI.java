@@ -2,6 +2,7 @@ package etf.santorini.sm160425d.GUI;
 
 import etf.santorini.sm160425d.Logic.Board;
 import etf.santorini.sm160425d.Logic.Game;
+import etf.santorini.sm160425d.boardstates.AIInitial;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.scene.Scene;
@@ -48,8 +49,10 @@ public class GameGUI extends Application {
             if(Game.numberOfAIPlayers < 0)
                 Game.numberOfAIPlayers = 0;
 
-            if(Game.numberOfAIPlayers == 2)
-                Game.aiTurn = true;
+            if(Game.numberOfAIPlayers == 2){
+                Board.currentBoard.setCurrentBoardState(AIInitial.getInstance());
+            }
+
 
             Game.gameStarted = true;
 
@@ -58,6 +61,7 @@ public class GameGUI extends Application {
         sideBox.getChildren().add(aiMove);
         aiMove.setOnMouseClicked(e -> {
             if(Game.aiTurn){
+                System.out.println("OOOOOK ?");
                 Board.currentBoard.boardOperation(0,0);
             }
         });

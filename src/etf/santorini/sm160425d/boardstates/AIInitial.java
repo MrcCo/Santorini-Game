@@ -22,12 +22,15 @@ public class AIInitial extends BoardState {
     public void boardOperation(int row, int col) {
         Board.currentBoard.AIInitialPicks();
 
-        Game.currentPlayer = (Game.currentPlayer + 1) % 2;
+        System.out.println("AI INIT CALLED");
+
+        Game.setNextPlayer();
 
         if(Game.numberOfAIPlayers == 1){
             Board.currentBoard.setCurrentBoardState(PlayState.getInstance());
         }else{
-            Board.currentBoard.setCurrentBoardState(AIPlayState.getInstance());
+            if(Game.currentPlayer == 0)
+                Board.currentBoard.setCurrentBoardState(AIPlayState.getInstance());
         }
     }
 }

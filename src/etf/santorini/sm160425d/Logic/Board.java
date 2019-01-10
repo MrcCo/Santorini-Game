@@ -186,8 +186,7 @@ public class Board {
 
             if (Board.currentBoard.getFieldFrom(row, col).isFree()) {                                                 //just to make sure
 
-                Token token = new Token(Board.currentBoard.getFieldFrom(row, col),
-                        1);                                                                                   //create new token
+                Token token = new Token(Board.currentBoard.getFieldFrom(row, col), Game.currentPlayer);                                                                                   //create new token
                 Board.currentBoard.tokens[Game.currentPlayer * 2 + count] = token;
 
                 if (Board.currentBoard.putToken(row, col, token)) {                                                 //if i manage to put a token on the board increase num of picks
@@ -198,25 +197,21 @@ public class Board {
         }
     }
 
-    public void AIFullMove() {
+    public boolean AIFullMove() {
 
         MoveLeadingToThisBoard best = Board.currentBoard.copy(null).getTheBestMove();
 
         if (best == null) {
             System.out.println("NEMA NAJBOOLJEG");
-            exit(10);
+            return false;
         }
 
         System.out.println(best);
 
         Board.currentBoard.moveTokenFromTo(best.getRowFrom(), best.getColFrom(), best.getRowTo(), best.getColTo());
-        Board.currentBoard.getFieldFrom(best.getRowBuilt(),best.getColBuilt()).increaseHeight();
+        Board.currentBoard.getFieldFrom(best.getRowBuilt(), best.getColBuilt()).increaseHeight();
 
-
-
-        Game.currentPlayer = (Game.currentPlayer + 1) % 2;
-
-
+        return true;
     }
 
     public static ArrayList<Board> generateAllBoards(Board board, int tempPlayer) {
@@ -237,13 +232,11 @@ public class Board {
                 int newRow = tokens[0].getMyField().getRow() + Board.arrayRow[i];
                 int newCol = tokens[0].getMyField().getCol() + Board.arrayCol[j];
 
-                if(newRow < 0 || newCol < 0 || newRow > 4 || newCol > 4)
-                    continue;
 
                 int oldRow = tokens[0].getMyField().getRow();
                 int oldCol = tokens[0].getMyField().getCol();
 
-                if (tokens[0].move(newRow, newCol , copy)) {
+                if (tokens[0].move(newRow, newCol, copy)) {
 
                     MoveLeadingToThisBoard newMove = new MoveLeadingToThisBoard(null);                                      //collect movement data
                     newMove.setRowFrom(oldRow);
@@ -257,19 +250,21 @@ public class Board {
 
                     possibleMoveBoards.add(copy);                                                                       //all boards only after moving
 
-                    copy = board.copy(null);
-                    tokens = copy.getPlayersTokens(tempPlayer);
                 }
+            }
+        }
 
-                newRow = tokens[1].getMyField().getRow() + Board.arrayRow[i];
-                newCol = tokens[1].getMyField().getCol() + Board.arrayCol[j];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
 
-                oldRow = tokens[1].getMyField().getRow();
-                oldCol = tokens[1].getMyField().getCol();
+                copy = board.copy(null);
+                tokens = copy.getPlayersTokens(tempPlayer);
 
+                int newRow = tokens[1].getMyField().getRow() + Board.arrayRow[i];
+                int newCol = tokens[1].getMyField().getCol() + Board.arrayCol[j];
 
-                if(newRow < 0 || newCol < 0 || newRow > 4 || newCol > 4)
-                    continue;
+                int oldRow = tokens[1].getMyField().getRow();
+                int oldCol = tokens[1].getMyField().getCol();
 
                 if (tokens[1].move(newRow, newCol, copy)) {
 
@@ -287,6 +282,7 @@ public class Board {
             }
         }
 
+
         ArrayList<Board> allMoves = new ArrayList<Board>();
 
         while (!possibleMoveBoards.isEmpty()) {
@@ -303,61 +299,57 @@ public class Board {
                     int newRow = tokens[0].getMyField().getRow() + Board.arrayRow[i];
                     int newCol = tokens[0].getMyField().getCol() + Board.arrayCol[j];
 
-                    if(newRow < 0 || newCol < 0 || newRow > 4 || newCol > 4)
-                        continue;
+                    if (temp.getMoveLeadingToThisBoard().getTokenMoved() != 1) {
 
-                    if(temp.getMoveLeadingToThisBoard().getTokenMoved() == 1)
-                        continue;
 
-                    if (tokens[0].build(newRow, newCol, copy)) {
-                        MoveLeadingToThisBoard newMove = new MoveLeadingToThisBoard(null);
-                        newMove.setRowFrom(temp.getMoveLeadingToThisBoard().getRowFrom());
-                        newMove.setColFrom(temp.getMoveLeadingToThisBoard().getColFrom());
-                        newMove.setRowTo(temp.getMoveLeadingToThisBoard().getRowTo());
-                        newMove.setColTo(temp.getMoveLeadingToThisBoard().getColTo());
+                        if (tokens[0].build(newRow, newCol, copy)) {
+                            MoveLeadingToThisBoard newMove = new MoveLeadingToThisBoard(null);
+                            newMove.setRowFrom(temp.getMoveLeadingToThisBoard().getRowFrom());
+                            newMove.setColFrom(temp.getMoveLeadingToThisBoard().getColFrom());
+                            newMove.setRowTo(temp.getMoveLeadingToThisBoard().getRowTo());
+                            newMove.setColTo(temp.getMoveLeadingToThisBoard().getColTo());
 
-                        newMove.setRowBuilt(tokens[0].getMyField().getRow() + Board.arrayRow[i]);
-                        newMove.setColBuilt(tokens[0].getMyField().getCol() + Board.arrayCol[j]);
+                            newMove.setRowBuilt(tokens[0].getMyField().getRow() + Board.arrayRow[i]);
+                            newMove.setColBuilt(tokens[0].getMyField().getCol() + Board.arrayCol[j]);
 
-                        copy.setMoveLeadingToThisBoard(newMove);
+                            copy.setMoveLeadingToThisBoard(newMove);
 
-                        newMove.setBoard(copy);
-                        allMoves.add(copy);
+                            newMove.setBoard(copy);
+                            allMoves.add(copy);
 
+                        }
                     }
                 }
             }
+
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
 
                     copy = temp.copy(null);
                     tokens = copy.getPlayersTokens(tempPlayer);
 
-                    int newRow = tokens[0].getMyField().getRow() + Board.arrayRow[i];
-                    int newCol = tokens[0].getMyField().getCol() + Board.arrayCol[j];
+                    int newRow = tokens[1].getMyField().getRow() + Board.arrayRow[i];
+                    int newCol = tokens[1].getMyField().getCol() + Board.arrayCol[j];
 
-                    if(newRow < 0 || newCol < 0 || newRow > 4 || newCol > 4)
-                        continue;
 
-                    if(temp.getMoveLeadingToThisBoard().getTokenMoved() == 0)
-                        continue;
+                    if (temp.getMoveLeadingToThisBoard().getTokenMoved() != 0) {
 
-                    if (tokens[1].build(tokens[1].getMyField().getRow() + Board.arrayRow[i], tokens[1].getMyField().getCol() + Board.arrayCol[j], copy)) {
-                        MoveLeadingToThisBoard newMove = new MoveLeadingToThisBoard(null);
-                        newMove.setRowFrom(temp.getMoveLeadingToThisBoard().getRowFrom());
-                        newMove.setColFrom(temp.getMoveLeadingToThisBoard().getColFrom());
-                        newMove.setRowTo(temp.getMoveLeadingToThisBoard().getRowTo());
-                        newMove.setColTo(temp.getMoveLeadingToThisBoard().getColTo());
-                        newMove.setRowBuilt(tokens[1].getMyField().getRow() + Board.arrayRow[i]);
-                        newMove.setColBuilt(tokens[1].getMyField().getCol() + Board.arrayCol[j]);
+                        if (tokens[1].build(newRow, newCol, copy)) {
+                            MoveLeadingToThisBoard newMove = new MoveLeadingToThisBoard(null);
+                            newMove.setRowFrom(temp.getMoveLeadingToThisBoard().getRowFrom());
+                            newMove.setColFrom(temp.getMoveLeadingToThisBoard().getColFrom());
+                            newMove.setRowTo(temp.getMoveLeadingToThisBoard().getRowTo());
+                            newMove.setColTo(temp.getMoveLeadingToThisBoard().getColTo());
+                            newMove.setRowBuilt(newRow);
+                            newMove.setColBuilt(newCol);
 
-                        copy.setMoveLeadingToThisBoard(newMove);
-                        newMove.setBoard(copy);
+                            copy.setMoveLeadingToThisBoard(newMove);
+                            newMove.setBoard(copy);
 
-                        allMoves.add(copy);
+                            allMoves.add(copy);
+                        }
                     }
                 }
-
 
             }
         }
@@ -455,16 +447,18 @@ public class Board {
 
         for (Board iter : allMoves) {
             //int val = Board.minimax(iter, 0, true);
-            int val = Board.minimaxAB(iter, 0, true,Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int val = Board.minimaxAB(iter, 0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if (val > best) {
                 best = val;
                 bestBoard = iter;
             }
         }
-
-        System.out.println("My next move is:" + bestBoard.getMoveLeadingToThisBoard());
-
-        return bestBoard.getMoveLeadingToThisBoard();
+        if (bestBoard != null) {
+            System.out.println("My next move is:" + bestBoard.getMoveLeadingToThisBoard());
+            return bestBoard.getMoveLeadingToThisBoard();
+        } else {
+            return null;
+        }
     }
 
 }

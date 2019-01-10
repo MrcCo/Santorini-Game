@@ -9,7 +9,7 @@ public class Game {
     public static int numberOfAIPlayers;
     public static boolean gameStarted = false;
     public static boolean aiTurn = false;
-    public static int maxDepth = 3;
+    public static int maxDepth = 1;
 
     Board board;
     GameGUI gameGUI;
@@ -25,6 +25,12 @@ public class Game {
         return board;
     }
 
+    public static int getNextPlayer(){
+        return (Game.currentPlayer + 1) % 2;
+    }
+    public static void setNextPlayer(){
+        Game.currentPlayer = (Game.currentPlayer + 1) % 2;
+    }
 
 
 }
