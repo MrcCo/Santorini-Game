@@ -123,6 +123,16 @@ public class Board {
         return cTokens;
     }
 
+    public static boolean currentPlayerWon(){
+        Token[] tokens = Board.currentBoard.getPlayersTokens(Game.currentPlayer);
+        if(tokens[0].getMyField().getMyHeight() == 3 || tokens[1].getMyField().getMyHeight() == 3 ){
+            return true;
+        }
+
+        if()
+        return false;
+    }                                                                       //check if current player reached lvl 3
+
     public static boolean playerHasAnyBuildsLeft(int player) {                                                                  //check if a player can move on the current board
         Token tokens[] = Board.currentBoard.getPlayersTokens(player);
 
