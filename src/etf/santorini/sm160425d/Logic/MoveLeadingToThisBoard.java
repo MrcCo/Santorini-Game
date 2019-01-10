@@ -78,18 +78,21 @@ public class MoveLeadingToThisBoard {
         int m = board.getFieldHeight(rowTo, colTo);
 
         if (board.getFieldHeight(rowTo, colTo) == 3)
-            m += 1000;
+            m += 20;
 
         int distTokenZero = Math.abs(board.tokens[0].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[0].getMyField().getRow() - rowBuilt);
         int distTokenOne = Math.abs(board.tokens[1].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[1].getMyField().getRow() - rowBuilt);
         int distTokenTwo = Math.abs(board.tokens[2].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[2].getMyField().getRow() - rowBuilt);
         int distTokenThree = Math.abs(board.tokens[3].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[3].getMyField().getRow() - rowBuilt);
 
+
         int l = distTokenZero + distTokenOne - distTokenTwo - distTokenThree;
 
         if (Game.currentPlayer == 1) {
             l = -1 * l;
         }
+
+
 
         l *= board.getFieldHeight(rowBuilt, colBuilt);
 
@@ -98,6 +101,7 @@ public class MoveLeadingToThisBoard {
 
     @Override
     public String toString() {
-        return "FROM ROW " + rowFrom + " FROM COL " + colFrom + "\nTO ROW " + rowTo + " TO COL " + colTo + "\nBUILD ROW " + rowBuilt + " BUILD COL " + colBuilt + "\n";
+        return "FROM ROW " + rowFrom + " FROM COL " + colFrom + "\nTO ROW " + rowTo + " TO COL " + colTo + "\nBUILD ROW "
+                + rowBuilt + " BUILD COL " + colBuilt + "\n FJA PROCENE " + this.calculateFunction() + "\n";
     }
 }

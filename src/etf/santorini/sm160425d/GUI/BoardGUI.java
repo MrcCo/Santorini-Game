@@ -1,6 +1,7 @@
 package etf.santorini.sm160425d.GUI;
 
 import etf.santorini.sm160425d.Logic.Board;
+import javafx.geometry.Insets;
 import javafx.scene.layout.TilePane;
 
 public class BoardGUI extends TilePane {
@@ -12,8 +13,9 @@ public class BoardGUI extends TilePane {
 
         this.setPrefColumns(board.cols);
         this.setPrefRows(board.rows);
-        this.setHgap(10);
-        this.setVgap(10);
+        this.setHgap(8);
+        this.setVgap(8);
+        this.setPadding(new Insets(10, 0, 10, 10));
 
         for (int i = 0; i < board.rows; i++) {
             for (int j = 0; j < board.cols; j++) {

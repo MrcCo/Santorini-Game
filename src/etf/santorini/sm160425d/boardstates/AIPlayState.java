@@ -35,6 +35,7 @@ public class AIPlayState extends BoardState {
             System.out.println("I WON U DUMB HUMAN");
             return;
         }
+
         Game.setNextPlayer();                                                                                           //set next player
 
         if (Game.numberOfAIPlayers == 1) {                                                                               //if AI is playing vs hunab let him play

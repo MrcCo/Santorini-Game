@@ -1,9 +1,11 @@
 package etf.santorini.sm160425d.Logic;
 
 import etf.santorini.sm160425d.GUI.BoardGUI;
+import etf.santorini.sm160425d.GUI.GameGUI;
 import etf.santorini.sm160425d.boardstates.BoardState;
 import etf.santorini.sm160425d.boardstates.Finished;
 import etf.santorini.sm160425d.boardstates.InitialState;
+import etf.santorini.sm160425d.boardstates.PlayState;
 
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class Board {
     public static int[] arrayCol = {-1, 0, 1};
 
     public Token tokens[] = new Token[4];
+    public int myScore;
 
     private Field matrix[][] = new Field[rows][cols];
     private BoardGUI myBoardGUI;
@@ -67,8 +70,8 @@ public class Board {
             for (int j = 0; j < cols; j++) {
                 Field temp = this.getFieldFrom(i, j).copy(ret);
 
-                if (temp.getMyToken() != null) {
-                    Token t = temp.getMyToken();
+                if (matrix[i][j].getMyToken() != null) {
+                    Token t = matrix[i][j].getMyToken().copy();
                     if (t.getPlayer() == 0) {
                         if (ret.tokens[0] == null) {
                             ret.tokens[0] = t;
@@ -123,7 +126,7 @@ public class Board {
         return cTokens;
     }
 
-    public static boolean currentPlayerWon() {
+    public boolean gameOver() {
         Token[] tokens = Board.currentBoard.getPlayersTokens(Game.currentPlayer);
         if (tokens[0].getMyField().getMyHeight() == 3 || tokens[1].getMyField().getMyHeight() == 3) {
             return true;
@@ -131,6 +134,24 @@ public class Board {
 
         return false;
     }                                                                       //check if current player reached lvl 3
+
+    public static boolean gameOver(Board board){
+        for(int i = 0; i < 4; i++){
+            if(board.tokens[i].getMyField().getMyHeight() == 3)
+                return true;
+        }
+        return false;
+    }
+
+
+    public static boolean playerWon(Board board, int player){
+        Token[] tokens = board.getPlayersTokens(player);
+        return tokens[0].getMyField().getMyHeight() == 3 || tokens[0].getMyField().getMyHeight() == 3;
+    }
+    public static boolean currentPlayerWon(){
+        Token[] tokens = Board.currentBoard.getPlayersTokens(Game.currentPlayer);
+        return tokens[0].getMyField().getMyHeight() == 3 || tokens[0].getMyField().getMyHeight() == 3;
+    }
 
     public static boolean playerHasAnyBuildsLeft(int player) {                                                                  //check if a player can move on the current board
         Token tokens[] = Board.currentBoard.getPlayersTokens(player);
@@ -208,14 +229,14 @@ public class Board {
 
     public boolean AIFullMove() {
 
-        MoveLeadingToThisBoard best = Board.currentBoard.copy(null).getTheBestMove();
-
+        //MoveLeadingToThisBoard best = minimax(Board.currentBoard.copy(null), 0, true);
+        MoveLeadingToThisBoard best = minimaxAB(Board.currentBoard.copy(null), 0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
         if (best == null) {
-            System.out.println("NEMA NAJBOOLJEG");
+            this.getMyGame().gameGUI.setMessageLabelText("NEMA NAJBOOLJEG");
             return false;
         }
 
-        System.out.println(best);
+        this.getMyGame().gameGUI.setMessageLabelText("Moj potez je :\n" + best.toString());
 
         Board.currentBoard.moveTokenFromTo(best.getRowFrom(), best.getColFrom(), best.getRowTo(), best.getColTo());
         Board.currentBoard.getFieldFrom(best.getRowBuilt(), best.getColBuilt()).increaseHeight();
@@ -225,6 +246,7 @@ public class Board {
 
     public static ArrayList<Board> generateAllBoards(Board board, int tempPlayer) {
 
+        int maxProcena = Integer.MIN_VALUE;
         ArrayList<Board> possibleMoveBoards = new ArrayList<Board>();
         Board copy;
         Token tokens[];
@@ -285,7 +307,8 @@ public class Board {
                     newMove.setTokenMoved(1);
                     copy.setMoveLeadingToThisBoard(newMove);
                     newMove.setBoard(copy);
-                    possibleMoveBoards.add(copy);                                                                       //all boards only after moving
+                    possibleMoveBoards.add(copy);                                                                       //all boards only after movin
+
 
                 }
             }
@@ -308,7 +331,7 @@ public class Board {
                     int newRow = tokens[0].getMyField().getRow() + Board.arrayRow[i];
                     int newCol = tokens[0].getMyField().getCol() + Board.arrayCol[j];
 
-                    if (temp.getMoveLeadingToThisBoard().getTokenMoved() != 1) {
+                    if (temp.getMoveLeadingToThisBoard().getTokenMoved() == 0) {
 
 
                         if (tokens[0].build(newRow, newCol, copy)) {
@@ -341,7 +364,7 @@ public class Board {
                     int newCol = tokens[1].getMyField().getCol() + Board.arrayCol[j];
 
 
-                    if (temp.getMoveLeadingToThisBoard().getTokenMoved() != 0) {
+                    if (temp.getMoveLeadingToThisBoard().getTokenMoved() == 1) {
 
                         if (tokens[1].build(newRow, newCol, copy)) {
                             MoveLeadingToThisBoard newMove = new MoveLeadingToThisBoard(null);
@@ -356,116 +379,138 @@ public class Board {
                             newMove.setBoard(copy);
 
                             allMoves.add(copy);
+
+                            if(newMove.calculateFunction() > maxProcena)
+                                maxProcena = newMove.calculateFunction();
                         }
                     }
                 }
 
             }
         }
+        System.out.println("MAX PROCENA JE" + maxProcena);
         return allMoves;
     }
 
-    public static int minimax(Board board, int depth, boolean isMax) {
+    public static MoveLeadingToThisBoard minimax(Board board, int depth, boolean isMax) {
 
-        if (depth == Game.maxDepth) {                                 //terminal state
-            return board.moveLeadingToThisBoard.calculateFunction();
-        }
-
+        int score = 0;
+        MoveLeadingToThisBoard temp;
+        MoveLeadingToThisBoard bestMove = null;
         int tempPlayer;
 
-        if (isMax) {                                                                                                      //if isMax player is current
+        if (depth == Game.maxDepth) {
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
+            return board.moveLeadingToThisBoard;
+        }
+
+        if(Board.gameOver(board)){
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
+            return board.moveLeadingToThisBoard;
+        }
+
+        if (isMax) {                                                                                                    //if isMax player is current
             tempPlayer = Game.currentPlayer;
         } else {
-            tempPlayer = (Game.currentPlayer + 1) % 2;                                                                //it is the other player
+            tempPlayer = Game.getNextPlayer();                                                                          //it is the other player
         }
 
         ArrayList<Board> allMoves = Board.generateAllBoards(board, tempPlayer);
 
-        int best = 0;
+        if(allMoves.isEmpty()){                                                                                         //nema vise poteza
+            if(tempPlayer == Game.currentPlayer) board.myScore -= 300;
+            else board.myScore = 1000;
+        }
+
+
         if (isMax) {
-            best = Integer.MIN_VALUE;
+            score = Integer.MIN_VALUE;
 
             for (Board b : allMoves) {
-                best = Math.max(best, minimax(b, depth + 1, !isMax));
+                temp = minimax(b, depth + 1, !isMax);
+                if(temp.getBoard().myScore > score){
+                    score = temp.getBoard().myScore;
+                    bestMove = b.moveLeadingToThisBoard;
+                }
             }
         } else {
-            best = Integer.MAX_VALUE;
+            score = Integer.MAX_VALUE;
 
             for (Board b : allMoves) {
-                best = Math.min(best, minimax(b, depth + 1, !isMax));
+                temp = minimax(b, depth + 1, !isMax);
+                if(temp.getBoard().myScore < score){
+                    score = temp.getBoard().myScore;
+                    bestMove = b.moveLeadingToThisBoard;
+                }
             }
         }
 
-        return best;
+        return bestMove;
 
     }
 
-    public static int minimaxAB(Board board, int depth, boolean isMax, int alpha, int beta) {
+    public static MoveLeadingToThisBoard minimaxAB(Board board, int depth, boolean isMax, int alpha, int beta) {
 
-        if (depth == Game.maxDepth) {                                 //terminal state
-            return board.moveLeadingToThisBoard.calculateFunction();
-        }
-
+        int score = 0;
+        MoveLeadingToThisBoard temp;
+        MoveLeadingToThisBoard bestMove = null;
         int tempPlayer;
 
-        if (isMax) {                                                                                                      //if isMax player is current
+        if (depth == Game.maxDepth) {
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
+            return board.moveLeadingToThisBoard;
+        }
+
+        if(Board.gameOver(board)){
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
+            return board.moveLeadingToThisBoard;
+        }
+
+        if (isMax) {                                                                                                    //if isMax player is current
             tempPlayer = Game.currentPlayer;
         } else {
-            tempPlayer = (Game.currentPlayer + 1) % 2;                                                                //it is the other player
+            tempPlayer = Game.getNextPlayer();                                                                          //it is the other player
         }
 
         ArrayList<Board> allMoves = Board.generateAllBoards(board, tempPlayer);
 
-        int best = 0;
-        int test = 0;
+        if(allMoves.isEmpty()){                                                                                         //nema vise poteza
+            if(tempPlayer == Game.currentPlayer) board.myScore -= 300;
+            else board.myScore = 1000;
+        }
+
+
         if (isMax) {
-            best = Integer.MIN_VALUE;
+            score = Integer.MIN_VALUE;
 
             for (Board b : allMoves) {
-                test = Math.max(best, minimaxAB(b, depth + 1, !isMax, alpha, beta));
-                best = Math.max(best, test);
-                alpha = Math.max(alpha, best);
-                if (beta <= alpha)
+                temp = minimaxAB(b, depth + 1, !isMax,alpha, beta);
+                if(temp.getBoard().myScore > score){
+                    score = temp.getBoard().myScore;
+                    bestMove = b.moveLeadingToThisBoard;
+                }
+
+                alpha = Math.max(alpha, score);
+                if(beta <= alpha)
                     break;
             }
         } else {
-            best = Integer.MAX_VALUE;
+            score = Integer.MAX_VALUE;
 
             for (Board b : allMoves) {
-                test = Math.min(best, minimaxAB(b, depth + 1, !isMax, alpha, beta));
-                best = Math.min(best, test);
-                beta = Math.min(beta, best);
-                if (beta <= alpha)
+                temp = minimaxAB(b, depth + 1, !isMax, alpha, beta);
+                if(temp.getBoard().myScore < score){
+                    score = temp.getBoard().myScore;
+                    bestMove = b.moveLeadingToThisBoard;
+                }
+                beta = Math.min(beta, score);
+                if(beta <= alpha)
                     break;
             }
         }
 
-        return best;
+        return bestMove;
 
-    }
-
-
-    public MoveLeadingToThisBoard getTheBestMove() {
-
-        Board temp = Board.currentBoard.copy(null);
-        ArrayList<Board> allMoves = temp.generateAllBoards(temp, Game.currentPlayer);
-
-        int best = Integer.MIN_VALUE;
-        Board bestBoard = null;
-
-        for (Board iter : allMoves) {
-            int val = Board.minimaxAB(iter, 0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            if (val > best) {
-                best = val;
-                bestBoard = iter;
-            }
-        }
-        if (bestBoard != null) {
-            System.out.println("My next move is:" + bestBoard.getMoveLeadingToThisBoard());
-            return bestBoard.getMoveLeadingToThisBoard();
-        } else {
-            return null;
-        }
     }
 
 }

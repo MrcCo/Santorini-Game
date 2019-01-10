@@ -1,5 +1,6 @@
 package etf.santorini.sm160425d.boardstates;
 
+import etf.santorini.sm160425d.GUI.GameGUI;
 import etf.santorini.sm160425d.Logic.Board;
 import etf.santorini.sm160425d.Logic.Game;
 import etf.santorini.sm160425d.Logic.Token;
@@ -35,10 +36,11 @@ public class PlayState extends BoardState {
     public void boardOperation(int row, int col) {
 
 
-        if (move == Move.SELECT) {                                                                                      //we are selecting a token
-
+        if (move == Move.SELECT) {
+                                                                                                                    //we are selecting a token
+            GameGUI.setMessageLabelText("");
             if (Board.currentBoard.getFieldFrom(row, col).isFree()) {                                              //there is no token on the field
-                System.out.println("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
+                GameGUI.setMessageLabelText("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
                 return;
             }
 
@@ -47,11 +49,12 @@ public class PlayState extends BoardState {
             if (tokenWeAreWorkingWith != null && tokenWeAreWorkingWith.getPlayer() == Board.currentBoard.getMyGame().currentPlayer) {     //check if it is current players token
                 if (tokenWeAreWorkingWith.hasMovesLeft(Board.currentBoard)) {                                     //if we selected an imobile token but player can move
                     tokenWeAreWorkingWith.highlight();
-                    move = Move.MOVE;                                                                           //diskutabilno
+                    Game.writer.printToFile(row,col,false);
+                    move = Move.MOVE;
                     return;
                 }
             } else {
-                System.out.println("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
+                GameGUI.setMessageLabelText("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
                 return;
             }
         } else {
@@ -62,21 +65,25 @@ public class PlayState extends BoardState {
 
                 if (tokenWeAreWorkingWith.move(row, col)) {                                                        //check if movement can be performed
 
+                    Game.writer.printToFile(row,col,false);
+
+                    GameGUI.setMessageLabelText("");
+
                     if (Board.currentPlayerWon()) {                                                                     //check if player won
-                        System.out.println("IMAMO POBEDNIKA");                                                          //TODO move to GUI
+                        GameGUI.setMessageLabelText("IMAMO POBEDNIKA");                                                          //TODO move to GUI
                         Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.currentPlayer));
                     }
 
                     if (!Board.playerHasAnyBuildsLeft(Game.currentPlayer)) {                                      //check if i can build anywhere
                         int winner = (Game.currentPlayer + 1) % 2;
-                        System.out.println("IMAMO POBEDNIKA I TO JE " + winner);
+                        GameGUI.setMessageLabelText("IMAMO POBEDNIKA I TO JE " + winner);
                         Board.currentBoard.setCurrentBoardState(Finished.getInstance(winner));                          //game over
                     }
 
                     move = Move.BUILD;
 
                 } else {                                                                                                   //bad move
-                    System.out.println("NEVALIDAN POMERAJ");
+                    GameGUI.setMessageLabelText("NEVALIDAN POMERAJ");
                     tokenWeAreWorkingWith.highlight();
                     return;
                 }
@@ -85,6 +92,10 @@ public class PlayState extends BoardState {
 
                 if (move == Move.BUILD) {
                     if (tokenWeAreWorkingWith.build(row, col)) {
+
+                        Game.writer.printToFile(row,col,true);
+
+                        GameGUI.setMessageLabelText("");
 
                         if (Game.numberOfAIPlayers == 1) {
                             Game.aiTurn = true;
@@ -95,6 +106,8 @@ public class PlayState extends BoardState {
 
                         Game.currentPlayer = (Game.currentPlayer + 1) % 2;
 
+                    }else{
+                        GameGUI.setMessageLabelText("NEVALIDAN BUILD");
                     }
                 }
 
