@@ -75,7 +75,6 @@ public class MoveLeadingToThisBoard {
         this.board = board;
     }
 
-    //TODO DODAJ DA SE UDALJAVA OD PROTIVNIKA U STARTU
     public int calculateFunction(int tempPlayer) {
 
         int score = 0;
@@ -142,7 +141,7 @@ public class MoveLeadingToThisBoard {
 
                 }
             }
-            score -= board.numberOfWinningMoves(Game.getNextPlayer()) * 20;                                             //discourage a move that has oponent winning
+            score -= board.numberOfWinningMoves(Game.getNextPlayer()) * 50;                                             //discourage a move that has oponent winning
         }else{
             l = -1 * l;
         }

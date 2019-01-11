@@ -1,6 +1,7 @@
 package etf.santorini.sm160425d.boardstates;
 
 import etf.santorini.sm160425d.GUI.GameGUI;
+import etf.santorini.sm160425d.Logic.Game;
 
 public class Finished extends BoardState {
 
@@ -11,13 +12,14 @@ public class Finished extends BoardState {
         if (instance == null)
             instance = new Finished();
 
-        GameGUI.setMessageLabelText("Dzaba stiskas gotova igra a pobedio je " + (instance.winner + 1));
+        GameGUI.setMessageLabelText("We have a winner - player " + (instance.winner + 1) + "\n" +GameGUI.getMessageLabelText());
+
+        Game.end = true;
         instance.winner = winner;
         return instance;
     }
 
     @Override
     public void boardOperation(int row, int col) {
-        GameGUI.setMessageLabelText("Dzaba stiskas gotova igra a pobedio je " + (instance.winner + 1));
     }
 }

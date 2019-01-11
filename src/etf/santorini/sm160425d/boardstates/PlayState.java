@@ -40,7 +40,7 @@ public class PlayState extends BoardState {
                                                                                                                     //we are selecting a token
             GameGUI.setMessageLabelText("");
             if (Board.currentBoard.getFieldFrom(row, col).isFree()) {                                              //there is no token on the field
-                GameGUI.setMessageLabelText("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
+                GameGUI.setMessageLabelText("SELECT AGAIN PLEASE, THIS ONE WAS INCORRECT");
                 return;
             }
 
@@ -54,7 +54,7 @@ public class PlayState extends BoardState {
                     return;
                 }
             } else {
-                GameGUI.setMessageLabelText("NEVALIDAN SELECT");                                                             //TODO MOVE TO GUI
+                GameGUI.setMessageLabelText("SELECT AGAIN PLEASE, THIS ONE WAS INCORRECT");
                 return;
             }
         } else {
@@ -67,23 +67,23 @@ public class PlayState extends BoardState {
 
                     Game.writer.printToFile(row,col,false);
 
-                    GameGUI.setMessageLabelText("");
+                    GameGUI.setMessageLabelText("Current player " + Game.currentPlayer);
 
                     if (Board.currentPlayerWon()) {                                                                     //check if player won
-                        GameGUI.setMessageLabelText("IMAMO POBEDNIKA");                                                          //TODO move to GUI
+                        GameGUI.setMessageLabelText("");
                         Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.currentPlayer));
                     }
 
                     if (!Board.playerHasAnyBuildsLeft(Game.currentPlayer)) {                                      //check if i can build anywhere
                         int winner = (Game.currentPlayer + 1) % 2;
-                        GameGUI.setMessageLabelText("IMAMO POBEDNIKA I TO JE " + winner);
+                        GameGUI.setMessageLabelText("");
                         Board.currentBoard.setCurrentBoardState(Finished.getInstance(winner));                          //game over
                     }
 
                     move = Move.BUILD;
 
                 } else {                                                                                                   //bad move
-                    GameGUI.setMessageLabelText("NEVALIDAN POMERAJ");
+                    GameGUI.setMessageLabelText("CANNOT MOVE THERE BUDDY");
                     tokenWeAreWorkingWith.highlight();
                     return;
                 }
@@ -95,7 +95,7 @@ public class PlayState extends BoardState {
 
                         Game.writer.printToFile(row,col,true);
 
-                        GameGUI.setMessageLabelText("");
+                        GameGUI.setMessageLabelText("Current player " + Game.currentPlayer);
 
                         if (Game.numberOfAIPlayers == 1) {
                             Game.aiTurn = true;
@@ -106,8 +106,10 @@ public class PlayState extends BoardState {
 
                         Game.currentPlayer = (Game.currentPlayer + 1) % 2;
 
+                        GameGUI.setMessageLabelText("Next player is: player " + Game.currentPlayer);
+
                     }else{
-                        GameGUI.setMessageLabelText("NEVALIDAN BUILD");
+                        GameGUI.setMessageLabelText("CANNOT BUILD THERE PAL");
                     }
                 }
 

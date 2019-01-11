@@ -20,6 +20,7 @@ public class FieldGUI extends StackPane {
         this.getChildren().add(base);
 
         this.setOnMouseClicked(event -> {                   //TODO FINISH MOUSE LISTENER
+            GameGUI.setResetPressed();
 
             if (Game.gameStarted && !Game.aiTurn)
                 Board.currentBoard.boardOperation(myField.getRow(), myField.getCol());

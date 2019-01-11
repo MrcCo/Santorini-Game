@@ -225,10 +225,10 @@ public class Board {
             return false;
         }
 
-        this.getMyGame().gameGUI.setMessageLabelText("Moj potez je :\n" + best.toString());
 
         Board.currentBoard.moveTokenFromTo(best.getRowFrom(), best.getColFrom(), best.getRowTo(), best.getColTo());
         Board.currentBoard.getFieldFrom(best.getRowBuilt(), best.getColBuilt()).increaseHeight();
+
 
         return true;
     }

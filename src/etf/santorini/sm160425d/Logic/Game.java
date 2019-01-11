@@ -11,6 +11,7 @@ public class Game {
     public static boolean gameStarted = false;
     public static boolean aiTurn = false;
     public static int maxDepth = 4;
+    public static  boolean end = false;
     public static MyFileWriter writer = new MyFileWriter("Game.txt");
     Board board;
     GameGUI gameGUI;

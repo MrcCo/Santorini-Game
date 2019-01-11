@@ -13,6 +13,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 
@@ -40,6 +43,23 @@ public class GameGUI extends Application {
 
     private static Label messageLabel = new Label();
 
+
+    private Button restartButton = new Button("Restart game");
+    private static boolean resetPressed = false;
+
+    public static void setResetPressed() {
+        GameGUI.resetPressed = false;
+    }
+
+    //sminka
+    private Circle playerOneCircle = new Circle(75, 75, 20);
+    private Label playerOneLabel = new Label("\tPlayer One");
+    private HBox playerOneSminka = new HBox();
+
+    private Circle playerTwoCircle = new Circle(75, 75, 20);
+    private Label playerTwoLabel = new Label("\tPlayer Two");
+    private HBox playerTwoSminka = new HBox();
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -55,6 +75,18 @@ public class GameGUI extends Application {
         sideBox.setMinSize(400, 800);
         sideBox.setSpacing(20);
         sideBox.setPadding(new Insets(20, 0, 0, 20));
+
+        //player one sminka setup
+        playerOneCircle.setStroke(Color.BLUE);
+        playerOneCircle.setFill(Color.BLUE);
+        playerOneSminka.getChildren().addAll(playerOneCircle, playerOneLabel);
+        sideBox.getChildren().add(playerOneSminka);
+
+        //player two sminka setup
+        playerTwoCircle.setStroke(Color.BLACK);
+        playerTwoCircle.setFill(Color.RED);
+        playerTwoSminka.getChildren().addAll(playerTwoCircle, playerTwoLabel);
+        sideBox.getChildren().add(playerTwoSminka);
 
         //AIBox setup
         AIBox.getChildren().addAll(numberOfAILabel, numberOfAI);
@@ -73,14 +105,18 @@ public class GameGUI extends Application {
 
         //start game button setup
         sideBox.getChildren().add(beginGame);
-        beginGame.setMinSize(330,40);
+        beginGame.setMinSize(330, 40);
         beginGame.setOnMouseClicked(e -> {
-            if(!Game.gameStarted) {
+            if (!Game.gameStarted && !Game.end) {
                 Game.maxDepth = Integer.parseInt(depthTextField.getText());
                 Game.numberOfAIPlayers = Integer.parseInt(numberOfAI.getText());
 
+                this.setResetPressed();
+
                 if (Game.maxDepth <= 0)
                     Game.maxDepth = 1;
+                if (Game.maxDepth > 5)                                                                                   //max reasonable depth, but why that tho
+                    Game.maxDepth = 5;
 
                 if (algorithms.getSelectedToggle() == minimaxRB)
                     Game.algorithmSelected = 0;
@@ -92,6 +128,20 @@ public class GameGUI extends Application {
                 if (Game.numberOfAIPlayers < 0)
                     Game.numberOfAIPlayers = 0;
 
+                if (Game.numberOfAIPlayers == 0) {
+                    playerOneLabel.setText("\tPlayer one - human");
+                    playerTwoLabel.setText("\tPlayer two - human");
+                }
+
+                if (Game.numberOfAIPlayers == 1) {                                                                        //sminka setup
+                    playerOneLabel.setText("\tPlayer one - human");
+                    playerTwoLabel.setText("\tPlayer two - AI Milorad");
+                }
+                if (Game.numberOfAIPlayers == 2) {
+                    playerOneLabel.setText("\tPlayer one - AI - Zivorad");
+                    playerTwoLabel.setText("\tPlayer two - AI - Miomir");
+                }
+
                 if (Game.numberOfAIPlayers == 2) {                                                                          //if there are no human players go to AIInitial state
                     Board.currentBoard.setCurrentBoardState(AIInitial.getInstance());
                 }
@@ -102,10 +152,58 @@ public class GameGUI extends Application {
 
         //AIMove button
         sideBox.getChildren().add(aiMove);
-        aiMove.setMinSize(330,40);
+        aiMove.setMinSize(330, 40);
         aiMove.setOnMouseClicked(e -> {
             if (Game.aiTurn) {
+                this.setResetPressed();
+
                 Board.currentBoard.boardOperation(0, 0);
+
+                if (!Game.end) {
+                    if (Game.numberOfAIPlayers == 1) {                                                                        //sminka setup
+                        GameGUI.setMessageLabelText("\tHuman's turn");
+                    }
+                    if (Game.numberOfAIPlayers == 2) {
+                        if (Game.currentPlayer == 0)
+                            GameGUI.setMessageLabelText("\tZivorad's turn");
+                        else
+                            GameGUI.setMessageLabelText("\tMomcilo's turn");
+                    }
+                }
+                return;
+            }
+            if (!Game.aiTurn) {
+                GameGUI.setMessageLabelText("\tStill Human's turn");
+                return;
+            }
+
+        });
+
+        //restart button
+        sideBox.getChildren().add(restartButton);
+        restartButton.setMinSize(330, 40);
+        restartButton.setOnMouseClicked(e -> {
+            if (!Game.end) {
+                if (!resetPressed) {
+                    GameGUI.setMessageLabelText("Game is not over yet. If you really want to restart press again");
+                    resetPressed = true;
+                } else {
+                    this.game = new Game(this);
+                    primaryPane.setCenter(game.getBoard().getMyBoardGUI());
+                    Game.gameStarted = false;
+                    Game.end = false;
+                    resetPressed = false;
+                }
+                return;
+            }
+
+            if (Game.end) {
+                GameGUI.setMessageLabelText("");
+                this.game = new Game(this);
+                primaryPane.setCenter(game.getBoard().getMyBoardGUI());
+                Game.gameStarted = false;
+                Game.end = false;
+                resetPressed = false;
             }
         });
 
@@ -113,18 +211,20 @@ public class GameGUI extends Application {
         sideBox.getChildren().add(messageLabel);
 
 
-
         //sidebox put
         primaryPane.setRight(sideBox);
-
 
 
         //stage show
         primaryStage.show();
     }
 
-    public static void setMessageLabelText(String text){
+    public static void setMessageLabelText(String text) {
         messageLabel.setText(text);
+    }
+
+    public static String getMessageLabelText() {
+        return GameGUI.messageLabel.getText();
     }
 
     public static void main(String args[]) {
