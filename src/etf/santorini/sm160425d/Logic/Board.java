@@ -69,30 +69,13 @@ public class Board {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 Field temp = this.getFieldFrom(i, j).copy(ret);
-
-                if (matrix[i][j].getMyToken() != null) {
-                    Token t = matrix[i][j].getMyToken().copy();
-                    if (t.getPlayer() == 0) {
-                        if (ret.tokens[0] == null) {
-                            ret.tokens[0] = t;
-                            ret.tokens[0].setMyField(temp);
-                        } else {
-                            ret.tokens[1] = t;
-                            ret.tokens[1].setMyField(temp);
-                        }
-                    } else {
-                        if (ret.tokens[2] == null) {
-                            ret.tokens[2] = t;
-                            ret.tokens[2].setMyField(temp);
-                        } else {
-                            ret.tokens[3] = t;
-                            ret.tokens[3].setMyField(temp);
-                        }
-                    }
-                }
-
-                ret.setFieldOn(i, j, temp);
+                ret.matrix[i][j] = temp;
             }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            ret.tokens[i] = this.tokens[i].copy();
+            ret.tokens[i].setMyField(ret.matrix[this.tokens[i].getMyField().getRow()][this.tokens[i].getMyField().getCol()]);
         }
 
         return ret;
@@ -135,22 +118,23 @@ public class Board {
         return false;
     }                                                                       //check if current player reached lvl 3
 
-    public static boolean gameOver(Board board){
-        for(int i = 0; i < 4; i++){
-            if(board.tokens[i].getMyField().getMyHeight() == 3)
+    public static boolean gameOver(Board board) {
+        for (int i = 0; i < 4; i++) {
+            if (board.tokens[i].getMyField().getMyHeight() == 3)
                 return true;
         }
         return false;
     }
 
 
-    public static boolean playerWon(Board board, int player){
+    public static boolean playerWon(Board board, int player) {
         Token[] tokens = board.getPlayersTokens(player);
-        return tokens[0].getMyField().getMyHeight() == 3 || tokens[0].getMyField().getMyHeight() == 3;
+        return tokens[0].getMyField().getMyHeight() == 3 || tokens[1].getMyField().getMyHeight() == 3;
     }
-    public static boolean currentPlayerWon(){
+
+    public static boolean currentPlayerWon() {
         Token[] tokens = Board.currentBoard.getPlayersTokens(Game.currentPlayer);
-        return tokens[0].getMyField().getMyHeight() == 3 || tokens[0].getMyField().getMyHeight() == 3;
+        return tokens[0].getMyField().getMyHeight() == 3 || tokens[1].getMyField().getMyHeight() == 3;
     }
 
     public static boolean playerHasAnyBuildsLeft(int player) {                                                                  //check if a player can move on the current board
@@ -229,8 +213,13 @@ public class Board {
 
     public boolean AIFullMove() {
 
-        //MoveLeadingToThisBoard best = minimax(Board.currentBoard.copy(null), 0, true);
-        MoveLeadingToThisBoard best = minimaxAB(Board.currentBoard.copy(null), 0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        MoveLeadingToThisBoard best;
+
+        if (Game.algorithmSelected == 0)
+            best = minimax(Board.currentBoard.copy(null), 0, true);
+        else
+            best = minimaxAB(Board.currentBoard.copy(null), 0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
         if (best == null) {
             this.getMyGame().gameGUI.setMessageLabelText("NEMA NAJBOOLJEG");
             return false;
@@ -380,15 +369,12 @@ public class Board {
 
                             allMoves.add(copy);
 
-                            if(newMove.calculateFunction() > maxProcena)
-                                maxProcena = newMove.calculateFunction();
                         }
                     }
                 }
 
             }
         }
-        System.out.println("MAX PROCENA JE" + maxProcena);
         return allMoves;
     }
 
@@ -399,27 +385,28 @@ public class Board {
         MoveLeadingToThisBoard bestMove = null;
         int tempPlayer;
 
-        if (depth == Game.maxDepth) {
-            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
-            return board.moveLeadingToThisBoard;
-        }
-
-        if(Board.gameOver(board)){
-            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
-            return board.moveLeadingToThisBoard;
-        }
-
         if (isMax) {                                                                                                    //if isMax player is current
             tempPlayer = Game.currentPlayer;
         } else {
             tempPlayer = Game.getNextPlayer();                                                                          //it is the other player
         }
 
-        ArrayList<Board> allMoves = Board.generateAllBoards(board, tempPlayer);
+        ArrayList<Board> allMoves = Board.generateAllBoards(board.copy(null), tempPlayer);
 
-        if(allMoves.isEmpty()){                                                                                         //nema vise poteza
-            if(tempPlayer == Game.currentPlayer) board.myScore -= 300;
+        if (depth == Game.maxDepth) {
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction(tempPlayer);
+            return board.moveLeadingToThisBoard;
+        }
+
+        if (Board.gameOver(board)) {
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction(tempPlayer);
+            return board.moveLeadingToThisBoard;
+        }
+
+        if (allMoves.isEmpty()) {                                                                                         //nema vise poteza
+            if (tempPlayer == Game.currentPlayer) board.myScore -= 1000;
             else board.myScore = 1000;
+            return board.moveLeadingToThisBoard;
         }
 
 
@@ -428,20 +415,24 @@ public class Board {
 
             for (Board b : allMoves) {
                 temp = minimax(b, depth + 1, !isMax);
-                if(temp.getBoard().myScore > score){
+
+                if (temp.getBoard().myScore > score) {
                     score = temp.getBoard().myScore;
                     bestMove = b.moveLeadingToThisBoard;
                 }
+
             }
         } else {
             score = Integer.MAX_VALUE;
 
             for (Board b : allMoves) {
                 temp = minimax(b, depth + 1, !isMax);
-                if(temp.getBoard().myScore < score){
+
+                if (temp.getBoard().myScore < score) {
                     score = temp.getBoard().myScore;
                     bestMove = b.moveLeadingToThisBoard;
                 }
+
             }
         }
 
@@ -456,15 +447,6 @@ public class Board {
         MoveLeadingToThisBoard bestMove = null;
         int tempPlayer;
 
-        if (depth == Game.maxDepth) {
-            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
-            return board.moveLeadingToThisBoard;
-        }
-
-        if(Board.gameOver(board)){
-            board.myScore = board.moveLeadingToThisBoard.calculateFunction();
-            return board.moveLeadingToThisBoard;
-        }
 
         if (isMax) {                                                                                                    //if isMax player is current
             tempPlayer = Game.currentPlayer;
@@ -474,9 +456,33 @@ public class Board {
 
         ArrayList<Board> allMoves = Board.generateAllBoards(board, tempPlayer);
 
-        if(allMoves.isEmpty()){                                                                                         //nema vise poteza
-            if(tempPlayer == Game.currentPlayer) board.myScore -= 300;
-            else board.myScore = 1000;
+        if (depth == Game.maxDepth) {
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction(tempPlayer);
+            return board.moveLeadingToThisBoard;
+        }
+        /*
+        //heh
+        if (Board.playerWon(board, tempPlayer)) {
+            System.out.println("I found a winning board");
+            board.myScore = -10000;
+            return board.moveLeadingToThisBoard;
+        }
+
+        //heh
+        if (Board.playerWon(board, (tempPlayer + 1) % 2)) {
+            board.myScore = 10000;
+            return board.moveLeadingToThisBoard;
+        }
+        */
+        if (Board.gameOver(board)) {
+            board.myScore = board.moveLeadingToThisBoard.calculateFunction(tempPlayer);
+            return board.moveLeadingToThisBoard;
+        }
+
+        if (allMoves.isEmpty()) {                                                                                         //nema vise poteza
+            if (tempPlayer == Game.currentPlayer) board.myScore -= 100;
+            else board.myScore += 100;
+            return board.moveLeadingToThisBoard;
         }
 
 
@@ -484,33 +490,90 @@ public class Board {
             score = Integer.MIN_VALUE;
 
             for (Board b : allMoves) {
-                temp = minimaxAB(b, depth + 1, !isMax,alpha, beta);
-                if(temp.getBoard().myScore > score){
+                temp = minimaxAB(b, depth + 1, !isMax, alpha, beta);
+
+                if (temp.getBoard().myScore > score) {
                     score = temp.getBoard().myScore;
                     bestMove = b.moveLeadingToThisBoard;
                 }
-
                 alpha = Math.max(alpha, score);
-                if(beta <= alpha)
+                if (beta <= alpha)
                     break;
+
             }
         } else {
             score = Integer.MAX_VALUE;
 
             for (Board b : allMoves) {
                 temp = minimaxAB(b, depth + 1, !isMax, alpha, beta);
-                if(temp.getBoard().myScore < score){
+
+                if (temp.getBoard().myScore < score) {
                     score = temp.getBoard().myScore;
                     bestMove = b.moveLeadingToThisBoard;
                 }
+
                 beta = Math.min(beta, score);
-                if(beta <= alpha)
+                if (beta <= alpha)
                     break;
+
             }
         }
 
         return bestMove;
 
     }
+
+    //optimization methods
+    public int numberOfWinningMoves(int player) {
+        Token tokens[] = this.getPlayersTokens(Game.getNextPlayer());
+        int ret = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                int checkRow = tokens[0].getMyField().getRow() + Board.arrayRow[i];
+                int checkCol = tokens[0].getMyField().getRow() + Board.arrayRow[j];
+
+                if (checkRow > 0 && checkCol > 0 && checkCol < Board.cols && checkRow < Board.rows) {
+                    if (this.getFieldHeight(checkRow, checkCol) == 3)
+                        ret++;
+                }
+
+                checkRow = tokens[1].getMyField().getRow() + Board.arrayRow[i];
+                checkCol = tokens[1].getMyField().getRow() + Board.arrayRow[j];
+
+                if (checkRow > 0 && checkCol > 0 && checkCol < Board.cols && checkRow < Board.rows) {
+                    if (this.getFieldHeight(checkRow, checkCol) == 3)
+                        ret++;
+                }
+            }
+        }
+        return ret;
+    }
+
+    public boolean isPlayerWinningMove(int row, int col, int player) {
+        Token[] tokens = this.getPlayersTokens(player);
+
+        if (tokens[0].possibleMove(row, col, this) && this.getFieldHeight(row, col) == 3)
+            return true;
+
+
+        if (tokens[1].possibleMove(row, col, this) && this.getFieldHeight(row, col) == 3)
+            return true;
+
+        return false;
+    }
+
+    public boolean jumpable(int row, int col, int player) {
+        Token[] tokens = this.getPlayersTokens(player);
+
+        if (tokens[0].possibleMove(row, col, this))
+            return true;
+
+
+        if (tokens[1].possibleMove(row, col, this))
+            return true;
+
+        return false;
+    }
+
 
 }

@@ -30,7 +30,7 @@ public class AIPlayState extends BoardState {
             Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.getNextPlayer()));
         }
 
-        if (Board.currentPlayerWon() == true) {                                                                           //finish the game if i won
+        if (Board.currentPlayerWon() == true) {                                                                         //finish the game if i won
             Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.currentPlayer));
             System.out.println("I WON U DUMB HUMAN");
             return;

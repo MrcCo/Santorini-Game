@@ -4,12 +4,12 @@ import etf.santorini.sm160425d.Logic.Board;
 import etf.santorini.sm160425d.Logic.Game;
 import etf.santorini.sm160425d.boardstates.AIInitial;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -29,6 +29,14 @@ public class GameGUI extends Application {
     private TextField numberOfAI = new TextField("0");
     private Label numberOfAILabel = new Label("Number of AI players: ");
     private HBox AIBox = new HBox(10);
+
+    private TextField depthTextField = new TextField("3");
+    private Label maxDepthLabel = new Label("Max depth: ");
+    private HBox DepthBox = new HBox(10);
+
+    RadioButton minimaxRB = new RadioButton("Minimax"), minimaxABRB = new RadioButton("Minimax + alpha beta pruning");
+    ToggleGroup algorithms = new ToggleGroup();
+    HBox algorithmHBox = new HBox();
 
     private static Label messageLabel = new Label();
 
@@ -52,24 +60,44 @@ public class GameGUI extends Application {
         AIBox.getChildren().addAll(numberOfAILabel, numberOfAI);
         sideBox.getChildren().add(AIBox);
 
+        //Depth setup
+        DepthBox.getChildren().addAll(maxDepthLabel, depthTextField);
+        DepthBox.setPadding(new Insets(0, 0, 0, 35));
+        sideBox.getChildren().add(DepthBox);
+
+        //algorithm setup
+        algorithms.getToggles().addAll(minimaxRB, minimaxABRB);
+        minimaxRB.setSelected(true);
+        algorithmHBox.getChildren().addAll(minimaxRB, minimaxABRB);
+        sideBox.getChildren().add(algorithmHBox);
+
         //start game button setup
         sideBox.getChildren().add(beginGame);
         beginGame.setMinSize(330,40);
         beginGame.setOnMouseClicked(e -> {
+            if(!Game.gameStarted) {
+                Game.maxDepth = Integer.parseInt(depthTextField.getText());
+                Game.numberOfAIPlayers = Integer.parseInt(numberOfAI.getText());
 
-            Game.numberOfAIPlayers = Integer.parseInt(numberOfAI.getText());
+                if (Game.maxDepth <= 0)
+                    Game.maxDepth = 1;
 
-            if (Game.numberOfAIPlayers > 2)                                                                             //just to make sure there are too many AIPlayers
-                Game.numberOfAIPlayers = 2;
-            if (Game.numberOfAIPlayers < 0)
-                Game.numberOfAIPlayers = 0;
+                if (algorithms.getSelectedToggle() == minimaxRB)
+                    Game.algorithmSelected = 0;
+                else
+                    Game.algorithmSelected = 1;
 
-            if (Game.numberOfAIPlayers == 2) {                                                                          //if there are no human players go to AIInitial state
-                Board.currentBoard.setCurrentBoardState(AIInitial.getInstance());
+                if (Game.numberOfAIPlayers > 2)                                                                             //just to make sure there are too many AIPlayers
+                    Game.numberOfAIPlayers = 2;
+                if (Game.numberOfAIPlayers < 0)
+                    Game.numberOfAIPlayers = 0;
+
+                if (Game.numberOfAIPlayers == 2) {                                                                          //if there are no human players go to AIInitial state
+                    Board.currentBoard.setCurrentBoardState(AIInitial.getInstance());
+                }
+
+                Game.gameStarted = true;
             }
-
-            Game.gameStarted = true;
-
         });
 
         //AIMove button
@@ -83,6 +111,8 @@ public class GameGUI extends Application {
 
         //message label
         sideBox.getChildren().add(messageLabel);
+
+
 
         //sidebox put
         primaryPane.setRight(sideBox);

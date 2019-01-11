@@ -4,6 +4,7 @@ public class MoveLeadingToThisBoard {
     private int rowFrom, colFrom, rowTo, colTo, rowBuilt, colBuilt;
     private Board board;
     private int tokenMoved;
+    private int tempPlayer;
 
     public int getTokenMoved() {
         return tokenMoved;
@@ -74,34 +75,84 @@ public class MoveLeadingToThisBoard {
         this.board = board;
     }
 
-    public int calculateFunction() {
-        int m = board.getFieldHeight(rowTo, colTo);
+    //TODO DODAJ DA SE UDALJAVA OD PROTIVNIKA U STARTU
+    public int calculateFunction(int tempPlayer) {
 
-        if (board.getFieldHeight(rowTo, colTo) == 3)
-            m += 20;
+        int score = 0;
 
-        int distTokenZero = Math.abs(board.tokens[0].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[0].getMyField().getRow() - rowBuilt);
-        int distTokenOne = Math.abs(board.tokens[1].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[1].getMyField().getRow() - rowBuilt);
-        int distTokenTwo = Math.abs(board.tokens[2].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[2].getMyField().getRow() - rowBuilt);
-        int distTokenThree = Math.abs(board.tokens[3].getMyField().getCol() - colBuilt) + Math.abs(board.tokens[3].getMyField().getRow() - rowBuilt);
+        Token[] myTokens = board.getPlayersTokens(Game.currentPlayer);
+        Token[] opTokens = board.getPlayersTokens(Game.getNextPlayer());
 
 
-        int l = distTokenZero + distTokenOne - distTokenTwo - distTokenThree;
+        int myTokenZeroDistance = myTokens[0].getMyField().getRow() + myTokens[0].getMyField().getCol() - rowBuilt - colBuilt;
+        int myTokenOneDistance = myTokens[1].getMyField().getRow() + myTokens[1].getMyField().getCol() - rowBuilt - colBuilt;
+        int opTokenZeroDistance = opTokens[0].getMyField().getRow() + opTokens[0].getMyField().getCol() - rowBuilt - colBuilt;
+        int opTokenOneDistance = opTokens[1].getMyField().getRow() + opTokens[1].getMyField().getCol() - rowBuilt - colBuilt;
 
-        if (Game.currentPlayer == 1) {
+        int l = board.getFieldHeight(rowBuilt, colBuilt) * (myTokenZeroDistance + myTokenOneDistance - opTokenZeroDistance - opTokenOneDistance);                   //project prediction
+
+
+        //encourage my tokens to go up
+        if (myTokens[0].getMyField().getMyHeight() == 3)
+            score += 1000;
+        if (myTokens[0].getMyField().getMyHeight() == 2)
+            score += 300;
+        if (myTokens[0].getMyField().getMyHeight() == 1)
+            score += 30;
+        if (myTokens[1].getMyField().getMyHeight() == 3)
+            score += 1000;
+        if (myTokens[1].getMyField().getMyHeight() == 2)
+            score += 300;
+        if (myTokens[1].getMyField().getMyHeight() == 1)
+            score += 30;
+
+        //discourage oponent
+        if (opTokens[0].getMyField().getMyHeight() == 3)
+            score -= 1000;
+        if (opTokens[0].getMyField().getMyHeight() == 2)
+            score -= 100;
+        if (opTokens[0].getMyField().getMyHeight() == 1)
+            score -= 30;
+        if (opTokens[1].getMyField().getMyHeight() == 3)
+            score -= 1000;
+        if (opTokens[1].getMyField().getMyHeight() == 2)
+            score -= 100;
+        if (opTokens[1].getMyField().getMyHeight() == 1)
+            score -= 30;
+
+
+        if (tempPlayer == Game.currentPlayer) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    int newRow = rowTo + Board.arrayRow[i];
+                    int newCol = colTo + Board.arrayRow[j];
+                    if (myTokens[0].possibleMove(newRow, newCol, board)) {
+                        score += 20 * board.getFieldHeight(newRow, newCol);                                             //encourage climbing
+                        if (board.getFieldHeight(newRow, newCol) == 3)                                                  //encourage winning even more
+                            score += 400;
+                    } else {
+                        if (myTokens[1].possibleMove(newRow, newCol, board)) {
+                            score += 20 * board.getFieldHeight(newRow, newCol);
+                            if (board.getFieldHeight(newRow, newCol) == 3)
+                                score += 400;
+                        } else {
+                            score -= 20;                                                                                //discourage unsuccessful moves
+                        }
+                    }
+
+                }
+            }
+            score -= board.numberOfWinningMoves(Game.getNextPlayer()) * 20;                                             //discourage a move that has oponent winning
+        }else{
             l = -1 * l;
         }
 
-
-
-        l *= board.getFieldHeight(rowBuilt, colBuilt);
-
-        return m + l;
+        return score + l;
     }
 
     @Override
     public String toString() {
         return "FROM ROW " + rowFrom + " FROM COL " + colFrom + "\nTO ROW " + rowTo + " TO COL " + colTo + "\nBUILD ROW "
-                + rowBuilt + " BUILD COL " + colBuilt + "\n FJA PROCENE " + this.calculateFunction() + "\n";
+                + rowBuilt + " BUILD COL " + colBuilt + "\n FJA PROCENE " + this.calculateFunction(tempPlayer) + "\n";
     }
 }
