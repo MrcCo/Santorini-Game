@@ -1,7 +1,6 @@
 package etf.santorini.sm160425d.Logic;
 
 import etf.santorini.sm160425d.GUI.GameGUI;
-import etf.santorini.sm160425d.fileWriter.MyFileWriter;
 
 public class Game {
 
@@ -12,7 +11,6 @@ public class Game {
     public static boolean aiTurn = false;
     public static int maxDepth = 4;
     public static  boolean end = false;
-    public static MyFileWriter writer = new MyFileWriter("Game.txt");
     Board board;
     GameGUI gameGUI;
 

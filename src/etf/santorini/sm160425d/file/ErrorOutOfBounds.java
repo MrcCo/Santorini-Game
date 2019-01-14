@@ -1,4 +1,4 @@
-package etf.santorini.sm160425d.fileWriter;
+package etf.santorini.sm160425d.file;
 
 public class ErrorOutOfBounds extends Throwable {
     private int row, col;

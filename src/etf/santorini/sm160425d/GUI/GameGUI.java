@@ -3,10 +3,9 @@ package etf.santorini.sm160425d.GUI;
 import etf.santorini.sm160425d.Logic.Board;
 import etf.santorini.sm160425d.Logic.Game;
 import etf.santorini.sm160425d.boardstates.AIInitial;
+import etf.santorini.sm160425d.file.MyFileReader;
+import etf.santorini.sm160425d.file.MyFileWriter;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -15,8 +14,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.io.FileNotFoundException;
 
 
 public class GameGUI extends Application {
@@ -47,6 +47,7 @@ public class GameGUI extends Application {
     private Button restartButton = new Button("Restart game");
     private static boolean resetPressed = false;
 
+
     public static void setResetPressed() {
         GameGUI.resetPressed = false;
     }
@@ -59,6 +60,14 @@ public class GameGUI extends Application {
     private Circle playerTwoCircle = new Circle(75, 75, 20);
     private Label playerTwoLabel = new Label("\tPlayer Two");
     private HBox playerTwoSminka = new HBox();
+
+    //save game
+    private TextField fileName = new TextField("Game.txt");
+    private Label file = new Label("File name");
+    private HBox fileBox = new HBox(10);
+
+    //load button
+    private Button loadButton = new Button("Load game");
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -110,6 +119,15 @@ public class GameGUI extends Application {
             if (!Game.gameStarted && !Game.end) {
                 Game.maxDepth = Integer.parseInt(depthTextField.getText());
                 Game.numberOfAIPlayers = Integer.parseInt(numberOfAI.getText());
+                try {
+                    String fn = fileName.getText();
+                    if(fn.equals(""))
+                        fn = "game.txt";
+
+                    MyFileWriter.getInstance().startAgain(fn);
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
 
                 this.setResetPressed();
 
@@ -193,6 +211,7 @@ public class GameGUI extends Application {
                     Game.gameStarted = false;
                     Game.end = false;
                     resetPressed = false;
+                    MyFileWriter.getInstance().save();
                 }
                 return;
             }
@@ -204,8 +223,35 @@ public class GameGUI extends Application {
                 Game.gameStarted = false;
                 Game.end = false;
                 resetPressed = false;
+                MyFileWriter.getInstance().save();
             }
         });
+
+        //load button
+        sideBox.getChildren().add(loadButton);
+        loadButton.setMinSize(330, 40);
+        loadButton.setOnMouseClicked(e -> {
+            String fn = fileName.getText();
+            this.game = new Game(this);
+            primaryPane.setCenter(game.getBoard().getMyBoardGUI());
+
+            if(fn.equals("")){
+                Game.gameStarted = true;
+                Game.currentPlayer = 0;
+                Game.end = false;
+                resetPressed = false;
+            }
+            String res = MyFileReader.getInstance().readFile(fn);
+            Board.loadGame(res);
+            Game.gameStarted = true;
+            Game.end = false;
+            resetPressed = false;
+
+
+        });
+        //file box
+        fileBox.getChildren().addAll(file, fileName);
+        sideBox.getChildren().add(fileBox);
 
         //message label
         sideBox.getChildren().add(messageLabel);

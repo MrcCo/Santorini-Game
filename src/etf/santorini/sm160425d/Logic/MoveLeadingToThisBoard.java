@@ -141,7 +141,7 @@ public class MoveLeadingToThisBoard {
 
                 }
             }
-            score -= board.numberOfWinningMoves(Game.getNextPlayer()) * 50;                                             //discourage a move that has oponent winning
+            score -= board.numberOfWinningMoves(Game.getNextPlayer()) * 200;                                             //discourage a move that has oponent winning
         }else{
             l = -1 * l;
         }
@@ -149,6 +149,7 @@ public class MoveLeadingToThisBoard {
         return score + l;
     }
 
+    //for debug only
     @Override
     public String toString() {
         return "FROM ROW " + rowFrom + " FROM COL " + colFrom + "\nTO ROW " + rowTo + " TO COL " + colTo + "\nBUILD ROW "

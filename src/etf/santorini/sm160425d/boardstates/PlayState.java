@@ -4,8 +4,7 @@ import etf.santorini.sm160425d.GUI.GameGUI;
 import etf.santorini.sm160425d.Logic.Board;
 import etf.santorini.sm160425d.Logic.Game;
 import etf.santorini.sm160425d.Logic.Token;
-
-import java.util.ArrayList;
+import etf.santorini.sm160425d.file.MyFileWriter;
 
 public class PlayState extends BoardState {
 
@@ -37,6 +36,12 @@ public class PlayState extends BoardState {
 
 
         if (move == Move.SELECT) {
+
+            if(!Board.currentBoard.playerHasAnyMovesLeft(Game.getNextPlayer())){
+                Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.getNextPlayer()));
+                Board.currentBoard.boardOperation(0,0);
+                return;
+            }
                                                                                                                     //we are selecting a token
             GameGUI.setMessageLabelText("");
             if (Board.currentBoard.getFieldFrom(row, col).isFree()) {                                              //there is no token on the field
@@ -49,7 +54,7 @@ public class PlayState extends BoardState {
             if (tokenWeAreWorkingWith != null && tokenWeAreWorkingWith.getPlayer() == Board.currentBoard.getMyGame().currentPlayer) {     //check if it is current players token
                 if (tokenWeAreWorkingWith.hasMovesLeft(Board.currentBoard)) {                                     //if we selected an imobile token but player can move
                     tokenWeAreWorkingWith.highlight();
-                    Game.writer.printToFile(row,col,false);
+                    MyFileWriter.getInstance().printToFile(row, col);
                     move = Move.MOVE;
                     return;
                 }
@@ -65,7 +70,7 @@ public class PlayState extends BoardState {
 
                 if (tokenWeAreWorkingWith.move(row, col)) {                                                        //check if movement can be performed
 
-                    Game.writer.printToFile(row,col,false);
+                    MyFileWriter.getInstance().printToFile(row, col);
 
                     GameGUI.setMessageLabelText("Current player " + Game.currentPlayer);
 
@@ -93,7 +98,8 @@ public class PlayState extends BoardState {
                 if (move == Move.BUILD) {
                     if (tokenWeAreWorkingWith.build(row, col)) {
 
-                        Game.writer.printToFile(row,col,true);
+                        MyFileWriter.getInstance().printToFile(row, col);
+                        MyFileWriter.getInstance().printNLToFile();
 
                         GameGUI.setMessageLabelText("Current player " + Game.currentPlayer);
 

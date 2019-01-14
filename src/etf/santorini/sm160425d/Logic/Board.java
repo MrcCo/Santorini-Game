@@ -1,16 +1,11 @@
 package etf.santorini.sm160425d.Logic;
 
 import etf.santorini.sm160425d.GUI.BoardGUI;
-import etf.santorini.sm160425d.GUI.GameGUI;
 import etf.santorini.sm160425d.boardstates.BoardState;
-import etf.santorini.sm160425d.boardstates.Finished;
 import etf.santorini.sm160425d.boardstates.InitialState;
-import etf.santorini.sm160425d.boardstates.PlayState;
+import etf.santorini.sm160425d.file.MyFileWriter;
 
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
-
-import static java.lang.System.exit;
 
 public class Board {
 
@@ -146,7 +141,7 @@ public class Board {
     public boolean playerHasAnyMovesLeft(int player) {
         Token tokens[] = this.getPlayersTokens(player);
 
-        return tokens[0].hasMovesLeft(this) || tokens[0].hasMovesLeft(this);
+        return tokens[0].hasMovesLeft(this) || tokens[1].hasMovesLeft(this);
     }                                                               //checks if player can move on any board
 
     public boolean putToken(int row, int col, Token token) {
@@ -205,15 +200,18 @@ public class Board {
 
                 if (Board.currentBoard.putToken(row, col, token)) {                                                 //if i manage to put a token on the board increase num of picks
                     count++;
+                    MyFileWriter.getInstance().printToFile(row, col);
                 }
 
             }
         }
+        MyFileWriter.getInstance().printNLToFile();
     }
 
     public boolean AIFullMove() {
 
         MoveLeadingToThisBoard best;
+
 
         if (Game.algorithmSelected == 0)
             best = minimax(Board.currentBoard.copy(null), 0, true);
@@ -223,6 +221,15 @@ public class Board {
         if (best == null) {
             this.getMyGame().gameGUI.setMessageLabelText("NEMA NAJBOOLJEG");
             return false;
+        }
+
+        if (best != null) {
+
+            MyFileWriter.getInstance().printToFile(best.getRowFrom(), best.getColFrom());
+            MyFileWriter.getInstance().printToFile(best.getRowTo(), best.getColTo());
+            MyFileWriter.getInstance().printToFile(best.getRowBuilt(), best.getColBuilt());
+            MyFileWriter.getInstance().printNLToFile();
+
         }
 
 
@@ -573,6 +580,65 @@ public class Board {
             return true;
 
         return false;
+    }
+
+    //game load method
+
+    public static void loadGame(String game) {
+        String moves[] = game.split(" ");
+
+
+
+        if (moves.length < 3)
+            return;
+        int row = -1;
+        int col = -1;
+        int cnt = 0;
+        for (int i = 0; i < 4; i++) {
+            if (i >= 2)
+                cnt = 1;
+            row = Board.cToInt(moves[i].charAt(0));
+            col = Integer.parseInt(String.valueOf(moves[i].charAt(1)));
+            Board.currentBoard.tokens[i] = new Token(Board.currentBoard.getFieldFrom(row, col), cnt);
+            Board.currentBoard.putToken(row, col, Board.currentBoard.tokens[i]);
+            System.out.println(row + " "+ col);
+        }
+
+        int rowFrom;
+        int rowTo;
+        int rowBuilt;
+        int colFrom;
+        int colTo;
+        int colBuilt;
+        for (int i = 3; i <= moves.length - 3; i += 3) {
+            rowFrom = Board.cToInt(moves[i].charAt(0));
+            colFrom = Integer.parseInt(String.valueOf(moves[i].charAt(1)));
+            rowTo = Board.cToInt(moves[i + 1].charAt(0));
+            colTo = Integer.parseInt(String.valueOf(moves[i + 1].charAt(1)));
+            rowBuilt = Board.cToInt(moves[i + 2].charAt(0));
+            colBuilt = Integer.parseInt(String.valueOf(moves[i + 2].charAt(1)));
+
+            System.out.println(rowFrom + " " + colFrom + " " + rowTo + " " + colTo);
+
+            Board.currentBoard.moveTokenFromTo(rowFrom, colFrom, rowTo, colTo);
+            Board.currentBoard.getFieldFrom(rowBuilt, colBuilt).increaseHeight();
+            cnt++;
+        }
+        Game.currentPlayer = cnt % 2;
+    }
+
+    public static int cToInt(Character s) {
+        if (s == 'A')
+            return 0;
+        if (s == 'B')
+            return 1;
+        if (s == 'C')
+            return 2;
+        if (s == 'D')
+            return 3;
+        if (s == 'E')
+            return 4;
+        return -1;
     }
 
 

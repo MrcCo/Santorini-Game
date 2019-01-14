@@ -43,6 +43,7 @@ public class AIPlayState extends BoardState {
                 GameGUI.setMessageLabelText("AI always wins muahahahahahah!");
 
             Board.currentBoard.setCurrentBoardState(Finished.getInstance(Game.getNextPlayer()));
+            Board.currentBoard.boardOperation(0,0);
         }
 
         if (Board.currentPlayerWon() == true) {                                                                         //finish the game if i won
