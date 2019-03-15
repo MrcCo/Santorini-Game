@@ -467,20 +467,7 @@ public class Board {
             board.myScore = board.moveLeadingToThisBoard.calculateFunction(tempPlayer);
             return board.moveLeadingToThisBoard;
         }
-        /*
-        //heh
-        if (Board.playerWon(board, tempPlayer)) {
-            System.out.println("I found a winning board");
-            board.myScore = -10000;
-            return board.moveLeadingToThisBoard;
-        }
 
-        //heh
-        if (Board.playerWon(board, (tempPlayer + 1) % 2)) {
-            board.myScore = 10000;
-            return board.moveLeadingToThisBoard;
-        }
-        */
         if (Board.gameOver(board)) {
             board.myScore = board.moveLeadingToThisBoard.calculateFunction(tempPlayer);
             return board.moveLeadingToThisBoard;

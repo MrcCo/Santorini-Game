@@ -4,7 +4,6 @@ public class MoveLeadingToThisBoard {
     private int rowFrom, colFrom, rowTo, colTo, rowBuilt, colBuilt;
     private Board board;
     private int tokenMoved;
-    private int tempPlayer;
 
     public int getTokenMoved() {
         return tokenMoved;
@@ -149,10 +148,5 @@ public class MoveLeadingToThisBoard {
         return score + l;
     }
 
-    //for debug only
-    @Override
-    public String toString() {
-        return "FROM ROW " + rowFrom + " FROM COL " + colFrom + "\nTO ROW " + rowTo + " TO COL " + colTo + "\nBUILD ROW "
-                + rowBuilt + " BUILD COL " + colBuilt + "\n FJA PROCENE " + this.calculateFunction(tempPlayer) + "\n";
-    }
+
 }
